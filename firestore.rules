@@ -4,66 +4,77 @@ service cloud.firestore {
     function signedIn() {
       return request.auth != null;
     }
+
+    // The existing owner account keeps working. New accounts can use cocinaAdmins/{uid}.
     function isAdmin() {
-      return signedIn() && exists(/databases/$(database)/documents/appsalonAdmins/$(request.auth.uid));
+      return signedIn() && (
+        exists(/databases/$(database)/documents/cocinaAdmins/$(request.auth.uid)) ||
+        exists(/databases/$(database)/documents/appsalonAdmins/$(request.auth.uid))
+      );
+    }
+
+    match /cocinaAdmins/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if false;
     }
 
     match /appsalonAdmins/{userId} {
       allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
-      // Dar de alta administradores solo desde Firebase Console.
       allow write: if false;
     }
 
-    match /appsalonServices/{serviceId} {
+    // Menu data is public to visitors. Only the owner can publish or remove dishes.
+    match /cocinaMenu/{productId} {
       allow read: if true;
       allow create, update: if isAdmin()
-        && request.resource.data.keys().hasOnly(['name', 'price', 'active'])
+        && request.resource.data.keys().hasOnly(['name', 'category', 'description', 'price', 'active'])
+        && request.resource.data.keys().hasAll(['name', 'category', 'description', 'price', 'active'])
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 80
+        && request.resource.data.category is string
+        && request.resource.data.category.size() > 0
+        && request.resource.data.category.size() <= 40
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 180
         && request.resource.data.price is number
-        && request.resource.data.price >= 0
+        && request.resource.data.price > 0
         && request.resource.data.active is bool;
       allow delete: if isAdmin();
     }
 
-    match /appsalonAppointments/{appointmentId} {
+    match /cocinaOrders/{orderId} {
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['uid', 'clientName', 'email', 'phone', 'date', 'time', 'serviceIds', 'status', 'createdAt'])
-        && request.resource.data.keys().hasAll(['uid', 'clientName', 'email', 'phone', 'date', 'time', 'serviceIds', 'status', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['uid', 'customerName', 'email', 'phone', 'date', 'time', 'delivery', 'address', 'notes', 'items', 'total', 'status', 'createdAt'])
+        && request.resource.data.keys().hasAll(['uid', 'customerName', 'email', 'phone', 'date', 'time', 'delivery', 'address', 'notes', 'items', 'total', 'status', 'createdAt'])
         && request.resource.data.uid == request.auth.uid
-        && request.resource.data.clientName is string
-        && request.resource.data.clientName.size() > 0
-        && request.resource.data.clientName.size() <= 80
+        && request.resource.data.customerName is string
+        && request.resource.data.customerName.size() > 0
+        && request.resource.data.customerName.size() <= 80
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.phone is string
         && request.resource.data.phone.size() > 0
         && request.resource.data.phone.size() <= 20
         && request.resource.data.date.matches('^\\d{4}-\\d{2}-\\d{2}$')
-        && request.resource.data.time.matches('^(1[0-7]|10):[03]0$|^18:00$')
-        && request.resource.data.serviceIds is list
-        && request.resource.data.serviceIds.size() > 0
-        && request.resource.data.serviceIds.size() <= 20
+        && request.resource.data.time.matches('^([01]\\d|2[0-3]):[0-5]\\d$')
+        && request.resource.data.delivery in ['pickup', 'delivery']
+        && request.resource.data.address is string
+        && request.resource.data.address.size() <= 250
+        && (request.resource.data.delivery == 'pickup' || request.resource.data.address.size() > 0)
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 300
+        && request.resource.data.items is list
+        && request.resource.data.items.size() > 0
+        && request.resource.data.items.size() <= 20
+        && request.resource.data.total is number
+        && request.resource.data.total > 0
         && request.resource.data.status == 'requested'
-        && request.resource.data.createdAt == request.time
-        && getAfter(/databases/$(database)/documents/appsalonSlots/$(request.resource.data.date + '_' + request.resource.data.time)).data.appointmentId == appointmentId;
-      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
-    }
+        && request.resource.data.createdAt == request.time;
 
-    match /appsalonSlots/{slotId} {
-      // Solo contiene el identificador de la cita, la fecha y la hora; se usa para bloquear dobles reservas.
-      allow read: if true;
-      allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['appointmentId', 'date', 'time'])
-        && request.resource.data.date is string
-        && request.resource.data.time is string
-        && slotId == request.resource.data.date + '_' + request.resource.data.time
-        && getAfter(/databases/$(database)/documents/appsalonAppointments/$(request.resource.data.appointmentId)).data.uid == request.auth.uid
-        && getAfter(/databases/$(database)/documents/appsalonAppointments/$(request.resource.data.appointmentId)).data.date == request.resource.data.date
-        && getAfter(/databases/$(database)/documents/appsalonAppointments/$(request.resource.data.appointmentId)).data.time == request.resource.data.time;
-      allow update: if false;
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['requested', 'preparing', 'ready', 'completed', 'canceled'];
       allow delete: if isAdmin();
     }
   }
