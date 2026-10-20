@@ -5,7 +5,7 @@ Esta es la versión estática para GitHub Pages. Usa Firebase Authentication par
 ## Funciones de esta primera versión
 
 - Crear cuenta, iniciar sesión y recuperar contraseña.
-- Publicar platillos con categoría, descripción y precio.
+- Publicar platillos con categoría, descripción, precio y foto.
 - Armar un carrito y solicitar pedidos para recoger o recibir a domicilio.
 - Consultar pedidos propios y cambiar el estado desde Administración.
 - Guardar el menú en `cocinaMenu` y los pedidos en `cocinaOrders`.
@@ -14,10 +14,12 @@ En esta primera versión los clientes crean una cuenta e inician sesión antes d
 
 La disponibilidad, el costo de envío y el total final se confirman directamente con el cliente. No se cobran pagos ni se envían avisos automáticos por correo o WhatsApp.
 
+Las fotos se reducen en el navegador a un máximo aproximado de 900 px y 240 KB y se guardan con el platillo en Firestore. Así no se necesita Cloud Storage. Cloud Storage para Firebase requiere el plan Blaze desde el 3 de febrero de 2026; como este sitio debe seguir en plan gratuito, no se usa ese producto. La foto ocupa parte de la cuota gratuita de Firestore y se limita para que el documento del platillo quede por debajo del máximo de 1 MiB.
+
 ## Configurar Firestore
 
 1. En Firebase Console, abre **Firestore Database > Reglas**.
-2. Copia el contenido de `firestore.rules` de esta carpeta y publícalo. Las reglas permiten leer el menú, protegen los pedidos por cuenta y limitan los cambios administrativos al UID autorizado.
+2. Copia el contenido actualizado de `firestore.rules` de esta carpeta y publícalo. Las reglas permiten leer el menú, protegen los pedidos por cuenta, limitan las fotos a imágenes JPEG comprimidas y reservan los cambios administrativos al UID autorizado.
 3. La cuenta administradora actual sigue autorizada si su documento existe en `appsalonAdmins`. Para autorizar otra cuenta, crea `cocinaAdmins` y un documento con el UID de esa cuenta como ID; déjalo vacío.
 4. Inicia sesión con esa cuenta y agrega los platillos en **Administración**.
 

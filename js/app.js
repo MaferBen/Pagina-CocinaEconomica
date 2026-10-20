@@ -24,6 +24,7 @@ let authMode = 'login';
 let notice = '';
 let noticeType = 'success';
 let busy = false;
+let photoPreviewUrl = '';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
 const money = value => new Intl.NumberFormat('es-MX', { style:'currency', currency:'MXN' }).format(Number(value || 0));
@@ -63,8 +64,13 @@ function wireTopbar() {
 
 function renderMenuCards() {
   if (!menu.length) return '<p class="empty-state">Aún no hay platillos en el menú. Vuelve pronto.</p>';
-  return `<div class="menu-grid">${menu.map(item => `<article class="menu-card"><div class="menu-card-top"><span class="category-pill">${esc(item.category || 'Del día')}</span><span class="dish-emoji" aria-hidden="true">🍽️</span></div>
+  return `<div class="menu-grid">${menu.map(item => `<article class="menu-card">${photoMarkup(item, 'dish-photo')}<div class="menu-card-top"><span class="category-pill">${esc(item.category || 'Del día')}</span></div>
     <h3>${esc(item.name)}</h3>${item.description ? `<p>${esc(item.description)}</p>` : ''}<div class="menu-card-bottom"><strong>${money(item.price)}</strong><button class="boton add-to-cart" data-add="${esc(item.id)}" type="button">Agregar</button></div></article>`).join('')}</div>`;
+}
+
+function photoMarkup(item, className) {
+  const image = typeof item.imageData === 'string' && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(item.imageData) ? item.imageData : '';
+  return image ? `<img class="${className}" src="${esc(image)}" alt="Foto de ${esc(item.name)}" loading="lazy">` : `<div class="${className} photo-placeholder" aria-label="Sin foto">🍲</div>`;
 }
 
 function cartMarkup() {
@@ -143,12 +149,14 @@ function renderAdmin() {
       <div class="campo"><label for="product-name">Platillo</label><input id="product-name" name="name" maxlength="80" required></div>
       <div class="campo"><label for="product-category">Categoría</label><input id="product-category" name="category" maxlength="40" placeholder="Comida corrida, bebida…" required></div>
       <div class="campo"><label for="product-price">Precio</label><input id="product-price" name="price" type="number" min="0.01" step="0.01" required></div>
-      <div class="campo"><label for="product-description">Descripción</label><input id="product-description" name="description" maxlength="180" placeholder="Ingredientes o acompañamiento"></div></div>
+      <div class="campo"><label for="product-description">Descripción</label><input id="product-description" name="description" maxlength="180" placeholder="Ingredientes o acompañamiento"></div>
+      <div class="campo photo-field"><label for="product-image">Foto del platillo</label><div><input id="product-image" name="image" type="file" accept="image/jpeg,image/png,image/webp" required><small>JPG, PNG o WebP; se reduce automáticamente para guardarse en Firebase.</small><img id="product-photo-preview" class="photo-preview" alt="Vista previa de la foto" hidden></div></div></div>
       <button class="boton" type="submit">Publicar platillo</button></form><div id="admin-menu"></div></section>
     <section class="panel-card"><div class="section-heading"><h2>Pedidos recibidos</h2><div class="campo"><label for="filter-date">Fecha</label><input id="filter-date" type="date" value="${todayISO()}"></div></div><div id="admin-orders" class="empty-state">Cargando pedidos…</div></section>`);
   wireTopbar();
   renderAdminMenu();
   root.querySelector('#product-form').addEventListener('submit', addProduct);
+  root.querySelector('#product-image').addEventListener('change', previewProductPhoto);
   root.querySelector('#filter-date').addEventListener('change', loadAdminOrders);
   loadAdminOrders();
 }
@@ -156,7 +164,7 @@ function renderAdmin() {
 function renderAdminMenu() {
   const host = root.querySelector('#admin-menu');
   if (!host) return;
-  host.innerHTML = `<h3 class="subheading">Platillos publicados</h3>${menu.length ? `<div class="admin-product-list">${menu.map(item => `<article class="admin-row"><div><strong>${esc(item.name)}</strong><p>${esc(item.category || '')} · ${money(item.price)}</p></div><button class="boton-eliminar" type="button" data-delete-product="${esc(item.id)}">Quitar del menú</button></article>`).join('')}</div>` : '<p class="empty-state">Todavía no agregas platillos.</p>'}`;
+  host.innerHTML = `<h3 class="subheading">Platillos publicados</h3>${menu.length ? `<div class="admin-product-list">${menu.map(item => `<article class="admin-row">${photoMarkup(item, 'admin-dish-photo')}<div class="admin-product-info"><strong>${esc(item.name)}</strong><p>${esc(item.category || '')} · ${money(item.price)}</p></div><button class="boton-eliminar" type="button" data-delete-product="${esc(item.id)}">Quitar del menú</button></article>`).join('')}</div>` : '<p class="empty-state">Todavía no agregas platillos.</p>'}`;
   host.querySelectorAll('[data-delete-product]').forEach(button => button.addEventListener('click', () => removeProduct(button.dataset.deleteProduct)));
 }
 
@@ -186,9 +194,67 @@ async function addProduct(event) {
   const formElement = event.currentTarget;
   const form = new FormData(formElement);
   const product = { name:String(form.get('name')).trim(), category:String(form.get('category')).trim(), description:String(form.get('description')).trim(), price:Number(form.get('price')), active:true };
+  const imageFile = form.get('image');
   if (!product.name || !product.category || !Number.isFinite(product.price) || product.price <= 0) return showNotice('Revisa el nombre, categoría y precio.', 'error');
-  try { await addDoc(collection(db, PRODUCTS), product); formElement.reset(); await loadMenu(); notice = 'Platillo publicado.'; render(); }
-  catch (error) { showNotice(errorMessage(error), 'error'); }
+  if (!(imageFile instanceof File) || !imageFile.size) return showNotice('Selecciona una foto del platillo.', 'error');
+  const button = formElement.querySelector('[type="submit"]');
+  button.disabled = true;
+  button.textContent = 'Comprimiendo foto…';
+  try {
+    product.imageData = await compressPhoto(imageFile);
+    button.textContent = 'Guardando platillo…';
+    await addDoc(collection(db, PRODUCTS), product);
+    formElement.reset(); clearPhotoPreview(); await loadMenu(); notice = 'Platillo y foto publicados.'; render();
+  } catch (error) { showNotice(errorMessage(error), 'error'); }
+  finally { button.disabled = false; }
+}
+
+function previewProductPhoto(event) {
+  clearPhotoPreview();
+  const file = event.currentTarget.files?.[0];
+  const preview = root.querySelector('#product-photo-preview');
+  if (!file || !preview) return;
+  photoPreviewUrl = URL.createObjectURL(file);
+  preview.src = photoPreviewUrl;
+  preview.hidden = false;
+}
+
+function clearPhotoPreview() {
+  if (photoPreviewUrl) URL.revokeObjectURL(photoPreviewUrl);
+  photoPreviewUrl = '';
+}
+
+async function compressPhoto(file) {
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('La foto debe estar en formato JPG, PNG o WebP.');
+  if (file.size > 12 * 1024 * 1024) throw new Error('La foto original debe pesar menos de 12 MB.');
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const image = await new Promise((resolve, reject) => {
+      const element = new Image();
+      element.onload = () => resolve(element);
+      element.onerror = () => reject(new Error('No se pudo abrir la foto. Elige otra imagen.'));
+      element.src = objectUrl;
+    });
+    const scale = Math.min(1, 900 / Math.max(image.naturalWidth, image.naturalHeight));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+    let blob = null;
+    for (const quality of [0.82, 0.72, 0.62, 0.52, 0.42]) {
+      blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+      if (blob && blob.size <= 240 * 1024) break;
+    }
+    if (!blob || blob.size > 240 * 1024) throw new Error('La foto no se pudo reducir lo suficiente. Prueba con otra imagen más sencilla.');
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('No se pudo preparar la foto. Intenta de nuevo.'));
+      reader.readAsDataURL(blob);
+    });
+    if (dataUrl.length > 350000) throw new Error('La foto comprimida todavía es demasiado grande. Prueba con otra imagen.');
+    return dataUrl;
+  } finally { URL.revokeObjectURL(objectUrl); }
 }
 
 async function removeProduct(id) {

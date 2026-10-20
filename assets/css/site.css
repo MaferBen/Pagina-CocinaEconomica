@@ -43,6 +43,8 @@ body { background:#211914; color:var(--cream); }
 .section-heading .campo label { flex-basis:auto; }
 .menu-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.3rem; }
 .menu-card { background:#fff8ec; color:#30231c; border-radius:1rem; padding:1.7rem; display:flex; flex-direction:column; min-height:19rem; }
+.dish-photo { width:calc(100% + 3.4rem); height:18rem; margin:-1.7rem -1.7rem 1.2rem; border-radius:1rem 1rem 0 0; object-fit:cover; background:#594231; }
+.photo-placeholder { display:grid; place-items:center; color:#fff0dd; font-size:4.5rem; }
 .menu-card-top,.menu-card-bottom { display:flex; align-items:center; justify-content:space-between; gap:.8rem; }
 .menu-card .category-pill { font-size:1.15rem; color:#70412d; background:#f1dfc9; padding:.4rem .8rem; border-radius:2rem; }
 .dish-emoji { font-size:2rem; }
@@ -78,6 +80,13 @@ body { background:#211914; color:var(--cream); }
 .admin-row { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
 .admin-row p { margin:.4rem 0 0; }
 .admin-row .boton-eliminar { white-space:nowrap; }
+.admin-dish-photo { width:7.2rem; height:6.2rem; flex:0 0 7.2rem; border-radius:.6rem; object-fit:cover; }
+.admin-dish-photo.photo-placeholder { font-size:2.5rem; }
+.admin-product-info { flex:1; }
+.photo-field > div { flex:1; min-width:0; }
+.photo-field input { width:100%; color:#eee0d1; }
+.photo-field small { display:block; color:#dfc9b7; font-size:1.15rem; line-height:1.5; margin-top:.5rem; }
+.photo-preview { display:block; width:100%; max-width:28rem; max-height:18rem; object-fit:cover; border-radius:.7rem; margin-top:1rem; }
 .subheading { margin:2.2rem 0 1rem; text-align:left; }
 .text-center { text-align:center; }
 .privacy-note { text-align:center; }
