@@ -1,0 +1,32 @@
+/* Ajustes para la versión estática publicada desde GitHub Pages. */
+:root { color-scheme: dark; }
+.app { overflow: visible !important; min-height: 100vh; }
+.panel { max-width: 76rem; margin: 0 auto; }
+.panel-card { background:#24251e; border:1px solid #42443a; border-radius:1rem; padding:2rem; margin:2rem 0; }
+.notice { padding:1.25rem 1.5rem; border-radius:.6rem; margin:1.5rem 0; background:#33352b; color:#fff; font-size:1.5rem; }
+.notice.error { background:#6e2020; }
+.notice.success { background:#225c21; }
+.auth-tabs { display:flex; gap:1rem; margin:2rem 0; }
+.auth-tabs button, .secondary-button { background:#33352b; color:#fff; border:1px solid #616456; padding:1rem 1.5rem; border-radius:.5rem; cursor:pointer; font-weight:700; }
+.auth-tabs button.active { background:#0da6f3; border-color:#0da6f3; }
+.service-card { cursor:pointer; border:2px solid transparent; }
+.service-card.selected { border-color:#0da6f3; }
+.service-card .service-description { font-size:1.4rem; color:#484a40; }
+.service-actions { display:flex; align-items:center; justify-content:center; gap:1rem; margin-top:1rem; }
+.service-actions button { width:auto; margin:0; padding:1rem 1.5rem; font-size:1.4rem; }
+.booking-form .campo { gap:1rem; }
+.booking-form textarea, .booking-form select { flex:1; min-width:0; border:0; border-radius:1rem; padding:1.25rem; }
+.summary-list { list-style:none; padding:0; }
+.summary-list li { border-bottom:1px solid #484a40; padding:1rem 0; font-size:1.6rem; }
+.topbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin:1rem 0 3rem; }
+.topbar p { font-size:1.5rem; margin:0; }
+.topbar .boton { margin:0; width:auto; }
+.admin-tools { display:flex; gap:1rem; flex-wrap:wrap; align-items:center; }
+.admin-tools .boton, .admin-tools .boton-eliminar { width:auto; margin:.5rem 0; padding:1rem 1.5rem; font-size:1.4rem; }
+.admin-row { border:1px solid #42443a; border-radius:.8rem; padding:1.5rem; margin:1.5rem 0; }
+.admin-row h3 { text-align:left; font-size:2rem; margin:0 0 1rem; }
+.admin-row p { font-size:1.5rem; margin:.5rem 0; }
+.admin-row .boton-eliminar { margin:1rem 0 0; width:auto; padding:1rem 1.5rem; font-size:1.4rem; }
+.empty-state { text-align:center; padding:2rem; color:#dadbd3; }
+input:focus, button:focus, select:focus, textarea:focus { outline:2px solid #0da6f3; outline-offset:2px; }
+@media(max-width: 767px) { .app { padding:2rem 0; } .topbar { align-items:stretch; } .topbar .boton { width:100%; } .auth-tabs { flex-direction:column; } }

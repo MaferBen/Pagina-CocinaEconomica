@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/appsalonAdmins/$(request.auth.uid));
+    }
+
+    match /appsalonAdmins/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
+      // Dar de alta administradores solo desde Firebase Console.
+      allow write: if false;
+    }
+
+    match /appsalonServices/{serviceId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['name', 'price', 'active'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.price is number
+        && request.resource.data.price >= 0
+        && request.resource.data.active is bool;
+      allow delete: if isAdmin();
+    }
+
+    match /appsalonAppointments/{appointmentId} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'clientName', 'email', 'phone', 'date', 'time', 'serviceIds', 'status', 'createdAt'])
+        && request.resource.data.keys().hasAll(['uid', 'clientName', 'email', 'phone', 'date', 'time', 'serviceIds', 'status', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.clientName is string
+        && request.resource.data.clientName.size() > 0
+        && request.resource.data.clientName.size() <= 80
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() > 0
+        && request.resource.data.phone.size() <= 20
+        && request.resource.data.date.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        && request.resource.data.time.matches('^(1[0-7]|10):[03]0$|^18:00$')
+        && request.resource.data.serviceIds is list
+        && request.resource.data.serviceIds.size() > 0
+        && request.resource.data.serviceIds.size() <= 20
+        && request.resource.data.status == 'requested'
+        && request.resource.data.createdAt == request.time
+        && getAfter(/databases/$(database)/documents/appsalonSlots/$(request.resource.data.date + '_' + request.resource.data.time)).data.appointmentId == appointmentId;
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /appsalonSlots/{slotId} {
+      // Solo contiene el identificador de la cita, la fecha y la hora; se usa para bloquear dobles reservas.
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['appointmentId', 'date', 'time'])
+        && request.resource.data.date is string
+        && request.resource.data.time is string
+        && slotId == request.resource.data.date + '_' + request.resource.data.time
+        && getAfter(/databases/$(database)/documents/appsalonAppointments/$(request.resource.data.appointmentId)).data.uid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/appsalonAppointments/$(request.resource.data.appointmentId)).data.date == request.resource.data.date
+        && getAfter(/databases/$(database)/documents/appsalonAppointments/$(request.resource.data.appointmentId)).data.time == request.resource.data.time;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+  }
+}
