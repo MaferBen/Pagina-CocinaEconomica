@@ -100,6 +100,57 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // The owner publishes a separate, date-specific set of dishes for each day.
+    match /cocinaDailyMenus/{date} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['date', 'dishIds', 'updatedAt', 'updatedBy'])
+        && request.resource.data.date == date
+        && date.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        && request.resource.data.dishIds is list
+        && request.resource.data.dishIds.size() > 0
+        && request.resource.data.dishIds.size() <= 50
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // One editable vote per signed-in account per day. Only the owner can see their vote;
+    // the administrator can read all votes to prepare the daily chart.
+    match /cocinaVotes/{voteId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create, update: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'date', 'dishId', 'updatedAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.date is string
+        && request.resource.data.date.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        && voteId == request.resource.data.date + '_' + request.auth.uid
+        && request.resource.data.dishId is string
+        && exists(/databases/$(database)/documents/cocinaMenu/$(request.resource.data.dishId))
+        && get(/databases/$(database)/documents/cocinaMenu/$(request.resource.data.dishId)).data.active == true;
+      allow delete: if isAdmin();
+    }
+
+    // Active promotions are visible to signed-in customers; only admins can publish or remove them.
+    match /cocinaPromotions/{promotionId} {
+      allow read: if signedIn();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['dishId', 'promoPrice', 'startDate', 'endDate', 'active', 'createdAt'])
+        && request.resource.data.dishId is string
+        && exists(/databases/$(database)/documents/cocinaMenu/$(request.resource.data.dishId))
+        && get(/databases/$(database)/documents/cocinaMenu/$(request.resource.data.dishId)).data.active == true
+        && request.resource.data.promoPrice is number
+        && request.resource.data.promoPrice > 0
+        && request.resource.data.startDate.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        && request.resource.data.endDate.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        && request.resource.data.endDate >= request.resource.data.startDate
+        && request.resource.data.active == true
+        && request.resource.data.createdAt == request.time;
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active'])
+        && request.resource.data.active == false;
+      allow delete: if isAdmin();
+    }
+
     match /cocinaOrders/{orderId} {
       allow create: if signedIn()
         && request.resource.data.keys().hasOnly(['uid', 'customerName', 'email', 'phone', 'date', 'time', 'delivery', 'address', 'notes', 'items', 'total', 'status', 'createdAt'])

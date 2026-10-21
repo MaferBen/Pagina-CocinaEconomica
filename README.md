@@ -2,13 +2,17 @@
 
 Esta es la versión estática para GitHub Pages. Usa Firebase Authentication para las cuentas y Cloud Firestore para el menú y los pedidos. La cuenta propietaria que ya estaba registrada como administradora en `appsalonAdmins` conserva el acceso al panel. También se puede autorizar otra cuenta creando `cocinaAdmins/{UID}` desde Firebase Console.
 
-## Funciones de esta primera versión
+## Funciones
 
 - Crear cuenta, iniciar sesión y recuperar contraseña.
-- Publicar platillos con categoría, descripción, precio y foto.
-- Armar un carrito y solicitar pedidos para recoger o recibir a domicilio.
+- Mantener una carta permanente de platillos con categoría, descripción, precio y foto.
+- Publicar una sección separada de promociones con precio especial y vigencia.
+- Publicar por separado el menú del día desde Administración.
+- Votar una vez al día por un platillo de la carta para sugerirlo para mañana. El cliente puede cambiar su voto durante el día.
+- Consultar en Administración una gráfica de votos para decidir el menú del día siguiente.
+- Armar un carrito con los platillos del menú de hoy y solicitar pedidos para recoger o recibir a domicilio.
 - Consultar pedidos propios y cambiar el estado desde Administración.
-- Guardar el menú en `cocinaMenu` y los pedidos en `cocinaOrders`.
+- Guardar la carta en `cocinaMenu`, promociones en `cocinaPromotions`, menús diarios en `cocinaDailyMenus`, votos en `cocinaVotes` y pedidos en `cocinaOrders`.
 
 En esta primera versión los clientes crean una cuenta e inician sesión antes de ver el menú o pedir. Si se prefiere aceptar pedidos sin cuenta, hay que ajustar el acceso de clientes antes de publicar.
 
@@ -19,9 +23,12 @@ Las fotos se reducen en el navegador a un máximo aproximado de 900 px y 240 KB 
 ## Configurar Firestore
 
 1. En Firebase Console, abre **Firestore Database > Reglas**.
-2. Copia el contenido actualizado de `firestore.rules` de esta carpeta y publícalo. Las reglas permiten leer el menú, protegen los pedidos por cuenta, limitan las fotos a imágenes JPEG comprimidas y reservan los cambios administrativos al UID autorizado.
+2. Copia el contenido actualizado de `firestore.rules` de esta carpeta y publícalo. Las reglas permiten leer la carta, las promociones y los menús diarios, limitan cada cuenta a su propio voto diario, protegen los pedidos por cuenta, limitan las fotos a imágenes JPEG comprimidas y reservan los cambios administrativos al UID autorizado.
 3. La cuenta administradora actual sigue autorizada si su documento existe en `appsalonAdmins`. Para autorizar otra cuenta, crea `cocinaAdmins` y un documento con el UID de esa cuenta como ID; déjalo vacío.
-4. Inicia sesión con esa cuenta y agrega los platillos en **Administración**.
+4. Inicia sesión con esa cuenta y agrega los platillos en **Administración** para crear la carta.
+5. En **Menú para hoy**, selecciona los platillos que ofrecerás y pulsa **Publicar menú de hoy**. Repite este paso cada día para actualizarlo.
+6. En **Votos para mañana**, consulta la gráfica de preferencias del día y usa el resultado para planear el menú siguiente.
+7. En **Crear promoción**, elige un platillo de la carta, indica el precio especial y las fechas de vigencia. Las promociones vigentes aparecerán en la sección **Promociones**.
 
 No pongas credenciales privadas en el JavaScript ni hagas público el acceso administrativo editando código. El objeto de configuración web de Firebase identifica el proyecto; las reglas controlan los permisos.
 

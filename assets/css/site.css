@@ -1,13 +1,14 @@
 :root { color-scheme: dark; --terra:#ce7550; --cream:#fff6e8; --panel:#30251f; --line:#534138; }
 body { background:#211914; color:var(--cream); }
 .contenedor-app { min-height:100vh; }
-.contenedor-app .imagen { background-image:linear-gradient(160deg,rgba(46,28,18,.18),rgba(33,25,20,.78)), radial-gradient(ellipse at 25% 30%,#dfaa5f 0 8%,transparent 9%), linear-gradient(135deg,#5f783f 0 28%,#8f4d31 28% 54%,#d4a35d 54% 72%,#493325 72%); background-size:cover; }
+.contenedor-app .imagen { background-image:linear-gradient(180deg,rgba(25,18,13,.04) 35%,rgba(25,18,13,.36)),url('../img/comida-casera.svg'); background-size:cover; background-position:center; }
+@media(min-width:768px) { .contenedor-app { grid-template-columns:minmax(28rem,38%) minmax(0,1fr); } }
 .app { overflow:visible !important; min-height:100vh; }
 .panel { max-width:76rem; margin:0 auto; }
-.brand { display:flex; justify-content:center; align-items:center; gap:1.2rem; margin:2rem 0 3rem; }
-.brand-mark { font-size:4.4rem; }
-.brand h1 { color:var(--cream); text-align:left; margin:0; font-size:3.4rem; }
-.eyebrow { color:#e7a077; font-size:1.2rem; font-weight:700; letter-spacing:.16em; margin:0 0 .5rem; text-align:center; }
+.brand { display:flex; justify-content:flex-start; align-items:center; gap:.9rem; margin:.4rem 0 1rem; }
+.brand-mark { font-size:2.7rem; }
+.brand h1 { color:var(--cream); text-align:left; margin:0; font-size:2.4rem; }
+.eyebrow { color:#e7a077; font-size:.95rem; font-weight:700; letter-spacing:.16em; margin:0 0 .2rem; text-align:center; }
 .brand .eyebrow { text-align:left; }
 .panel-card { background:var(--panel); border:1px solid var(--line); border-radius:1.3rem; padding:2.2rem; margin:2rem 0; }
 .panel-card h2 { margin:0 0 1.8rem; font-size:2.8rem; }
@@ -28,12 +29,12 @@ body { background:#211914; color:var(--cream); }
 .boton:hover { background:#b85e3c; }
 .boton:disabled { opacity:.55; cursor:not-allowed; }
 .boton-eliminar { background:#9d4031; color:#fff; border:0; border-radius:.6rem; padding:.9rem 1.2rem; cursor:pointer; font-size:1.3rem; }
-.topbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin:1rem 0 2rem; }
+.topbar { display:flex; align-items:center; justify-content:space-between; gap:.8rem; flex-wrap:wrap; margin:.6rem 0 1.2rem; }
 .topbar p { font-size:1.4rem; margin:0; overflow-wrap:anywhere; }
-.topbar .boton { margin:0; }
+.topbar .boton { margin:0; padding:.85rem 1.2rem; font-size:1.25rem; }
 .admin-tools { display:flex; gap:.7rem; flex-wrap:wrap; align-items:center; }
 .admin-tools button { font-size:1.25rem; padding:.9rem 1.1rem; }
-.hero-copy { text-align:center; padding:2rem 0 1rem; }
+.hero-copy { text-align:center; padding:.8rem 0 .3rem; }
 .hero-copy h2 { font-size:3.2rem; margin:.8rem 0; }
 .hero-copy > p:last-child { color:#e5d3c2; font-size:1.6rem; }
 .section-heading { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
@@ -42,6 +43,18 @@ body { background:#211914; color:var(--cream); }
 .section-heading .campo { margin:0; }
 .section-heading .campo label { flex-basis:auto; }
 .menu-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.3rem; }
+.daily-menu-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; }
+.daily-menu-options label,.vote-option { display:flex; align-items:center; gap:.8rem; padding:1rem; border:1px solid var(--line); border-radius:.8rem; background:#382c24; font-size:1.35rem; }
+.daily-menu-options input,.vote-option input { accent-color:var(--terra); }
+.vote-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+.vote-option { align-items:center; }
+.vote-photo { width:8rem; height:7rem; flex:0 0 8rem; border-radius:.6rem; object-fit:cover; }
+.vote-option span { display:grid; gap:.3rem; }
+.vote-option small { color:#dfc9b7; }
+.vote-results { display:grid; gap:1.2rem; }
+.vote-result > div:first-child { display:flex; justify-content:space-between; gap:1rem; font-size:1.35rem; }
+.vote-bar { height:1rem; border-radius:1rem; overflow:hidden; background:#514137; margin-top:.5rem; }
+.vote-bar i { display:block; height:100%; border-radius:inherit; background:var(--terra); }
 .menu-card { background:#fff8ec; color:#30231c; border-radius:1rem; padding:1.7rem; display:flex; flex-direction:column; min-height:19rem; }
 .dish-photo { width:calc(100% + 3.4rem); height:18rem; margin:-1.7rem -1.7rem 1.2rem; border-radius:1rem 1rem 0 0; object-fit:cover; background:#594231; }
 .photo-placeholder { display:grid; place-items:center; color:#fff0dd; font-size:4.5rem; }
@@ -52,6 +65,11 @@ body { background:#211914; color:var(--cream); }
 .menu-card p { color:#554840; font-size:1.35rem; margin:.2rem 0 1.2rem; }
 .menu-card-bottom { margin-top:auto; }
 .menu-card-bottom strong { font-size:1.8rem; color:#9b492e; }
+.promotion-card .menu-card-bottom { justify-content:flex-start; }
+.promotion-card .menu-card-bottom del { color:#85776c; font-size:1.35rem; margin-right:.6rem; }
+.promotion-card .menu-card-bottom strong { color:#b84b2d; }
+.promo-badge { background:#a63827; color:#fff4df; border-radius:2rem; padding:.45rem .8rem; font-size:1.05rem; font-weight:700; letter-spacing:.08em; }
+.promo-dates { display:block; color:#dfc9b7; margin-top:.8rem; font-size:1.15rem; }
 .menu-card-bottom .boton { margin:0; padding:.8rem 1.1rem; font-size:1.25rem; }
 .empty-state { text-align:center; padding:2rem; color:#e1d1c2; font-size:1.5rem; }
 .cart-list { list-style:none; padding:0; margin:0; }
@@ -93,12 +111,14 @@ body { background:#211914; color:var(--cream); }
 input:focus,button:focus,select:focus,textarea:focus { outline:2px solid #edaa80; outline-offset:2px; }
 @media(max-width:767px) {
   .contenedor-app { display:block; }
-  .contenedor-app .imagen { height:13rem; }
-  .app { padding:1rem 0 3rem; }
-  .brand { margin:1rem 0 2rem; }
-  .brand h1 { font-size:2.6rem; }
+  .contenedor-app .imagen { height:17rem; background-position:center 48%; }
+  .app { padding:.6rem 0 3rem; }
+  .brand { margin:.3rem 0 .8rem; }
+  .brand h1 { font-size:2.2rem; }
+  .topbar { margin:.5rem 0 1rem; }
   .panel-card { padding:1.5rem; margin:1.3rem 0; }
   .menu-grid { grid-template-columns:1fr; }
+  .vote-options,.daily-menu-options { grid-template-columns:1fr; }
   .menu-card { min-height:0; }
   .campo { align-items:stretch; flex-direction:column; gap:.6rem; }
   .campo label { flex:initial; }

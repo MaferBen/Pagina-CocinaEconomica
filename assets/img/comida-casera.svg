@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" role="img" aria-label="Platillo casero mexicano">
+  <defs>
+    <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#9c633d"/><stop offset="1" stop-color="#33231b"/></linearGradient>
+    <radialGradient id="plate"><stop stop-color="#fff6df"/><stop offset=".82" stop-color="#f3dfbd"/><stop offset=".84" stop-color="#d4b58a"/><stop offset="1" stop-color="#fff0d1"/></radialGradient>
+    <linearGradient id="rice" x2="0" y2="1"><stop stop-color="#fff2c7"/><stop offset="1" stop-color="#e8ca8e"/></linearGradient>
+    <filter id="shadow" x="-.3" y="-.3" width="1.6" height="1.6"><feGaussianBlur stdDeviation="24"/></filter>
+  </defs>
+  <rect width="900" height="1200" fill="url(#bg)"/>
+  <circle cx="120" cy="170" r="170" fill="#e8b56b" opacity=".16"/>
+  <circle cx="780" cy="950" r="210" fill="#78934f" opacity=".18"/>
+  <ellipse cx="458" cy="700" rx="360" ry="365" fill="#160f0b" opacity=".4" filter="url(#shadow)"/>
+  <circle cx="450" cy="650" r="330" fill="url(#plate)"/>
+  <circle cx="450" cy="650" r="270" fill="#fffaf0"/>
+  <!-- arroz -->
+  <path d="M235 540c35-105 166-138 251-74 61 46 61 126 7 171-66 56-199 49-253-6-28-28-22-60-5-91z" fill="url(#rice)"/>
+  <g fill="#f6e8c0"><ellipse cx="317" cy="477" rx="27" ry="8" transform="rotate(25 317 477)"/><ellipse cx="387" cy="453" rx="26" ry="8" transform="rotate(-15 387 453)"/><ellipse cx="456" cy="486" rx="27" ry="8" transform="rotate(30 456 486)"/><ellipse cx="283" cy="538" rx="25" ry="8" transform="rotate(-20 283 538)"/><ellipse cx="366" cy="527" rx="28" ry="8" transform="rotate(12 366 527)"/><ellipse cx="438" cy="558" rx="26" ry="8" transform="rotate(-25 438 558)"/></g>
+  <!-- guisado de pollo con salsa -->
+  <path d="M499 488c74-51 181-16 204 67 23 81-40 147-113 156-67 8-141-31-151-91-9-52 14-101 60-132z" fill="#b84b2d"/>
+  <path d="M516 519c55-42 136-22 156 34 15 41-13 85-56 100-44 16-96-4-115-38-19-34-11-73 15-96z" fill="#df7937"/>
+  <g fill="#f2b747"><circle cx="549" cy="552" r="13"/><circle cx="626" cy="534" r="11"/><circle cx="665" cy="585" r="14"/><circle cx="592" cy="617" r="12"/></g>
+  <g fill="#55713e"><path d="M552 574q30-45 58-32-8 37-58 32z"/><path d="M626 570q28-44 55-31-7 36-55 31z"/><path d="M578 640q21-36 49-26-6 31-49 26z"/></g>
+  <!-- frijoles -->
+  <path d="M260 690c10-69 99-100 161-65 55 31 56 99 12 133-50 38-143 27-165-21-7-14-10-30-8-47z" fill="#694032"/>
+  <g fill="#9b6042"><ellipse cx="305" cy="690" rx="20" ry="14" transform="rotate(28 305 690)"/><ellipse cx="352" cy="668" rx="21" ry="14" transform="rotate(-20 352 668)"/><ellipse cx="393" cy="703" rx="20" ry="14" transform="rotate(16 393 703)"/><ellipse cx="324" cy="739" rx="20" ry="14" transform="rotate(-12 324 739)"/><ellipse cx="375" cy="746" rx="19" ry="13" transform="rotate(23 375 746)"/></g>
+  <!-- tortillas y limon -->
+  <path d="M492 755q48-88 121-40 43 28 32 75-70 26-153-35z" fill="#e9bd65"/><path d="M510 754q42-61 91-36" fill="none" stroke="#f9dc91" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="686" cy="716" r="43" fill="#7b9a48"/><path d="M686 676v80m-39-40h78m-67-28 56 56m0-56-56 56" stroke="#c6d179" stroke-width="5"/>
+  <g fill="#f7e8bd"><circle cx="267" cy="835" r="9"/><circle cx="296" cy="858" r="7"/><circle cx="633" cy="834" r="8"/></g>
+  <text x="450" y="1060" text-anchor="middle" fill="#fff4df" font-family="Arial,sans-serif" font-size="36" font-weight="700" letter-spacing="5">HECHO EN CASA</text>
+</svg>
